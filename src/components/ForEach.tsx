@@ -2,7 +2,6 @@ import {
     cloneElement,
     ComponentType,
     Fragment,
-    ReactElement,
     ReactNode,
     useCallback,
     useMemo,
@@ -12,23 +11,17 @@ import { Fallback } from "./Fallback";
 import { traverse } from "../utils/children";
 import { genericMemo } from "../utils/react";
 
-type BaseItemProps<T> = {
-    item?: T;
-    index?: number;
-    // ComponentProps?
-};
-
-type ItemWithRenderProp<T> = BaseItemProps<T> & {
+type ItemWithRenderProp<T> = {
     children: (data: { item: T; index: number }) => ReactNode;
     as?: never;
 };
 
-type ItemWithComponent<T> = BaseItemProps<T> & {
+type ItemWithComponent<T> = {
     as: ComponentType<{ item: T; index: number; [key: string]: any }>;
     children?: never;
 };
 
-type ItemWithStaticChildren<T> = BaseItemProps<T> & {
+type ItemWithStaticChildren = {
     children?: ReactNode;
     as?: never;
 };
@@ -36,25 +29,20 @@ type ItemWithStaticChildren<T> = BaseItemProps<T> & {
 type ItemProps<T> =
     | ItemWithRenderProp<T>
     | ItemWithComponent<T>
-    | ItemWithStaticChildren<T>;
+    | ItemWithStaticChildren;
 
 const ItemComponent = <T,>({
     children,
     as: Component,
-    item,
-    index,
     ...restProps
 }: ItemProps<T>) => {
-    if (item === undefined || index === undefined) {
-        return null;
-    }
-
     if (typeof children === "function") {
-        return <>{children({ item, index, ...restProps })}</>;
+        return <>{children({ ...restProps } as never)}</>;
     }
 
     if (Component) {
-        return <Component item={item} index={index} {...restProps} />;
+        // @ts-ignore
+        return <Component {...restProps} />;
     }
 
     return <>{children}</>;
@@ -91,11 +79,11 @@ const ForEachComponent = <T,>({
         (item: T, index: number) => {
             const key = memoizedIdentifier(item, index);
             const children = renderItems.map((child, childIndex) => {
-                return cloneElement(child as ReactElement<any>, {
+                return cloneElement(child, {
                     item,
                     index,
                     key: childIndex,
-                });
+                } as object);
             });
 
             return <Fragment key={key}>{children}</Fragment>;

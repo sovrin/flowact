@@ -99,7 +99,7 @@ export const WithFallback: Story = {
         return (
             <ForEach items={args?.items}>
                 <Fallback>No users available</Fallback>
-                <Item>{Render}</Item>
+                <Item<number>>{Render}</Item>
             </ForEach>
         );
     },
@@ -112,7 +112,7 @@ export const WithRestParameters: Story = {
     render: (args) => {
         return (
             <ForEach items={args?.items}>
-                <Item<number> cla>{Render}</Item>
+                <Item<number> as={Render} />
             </ForEach>
         );
     },
