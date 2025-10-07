@@ -1,5 +1,11 @@
-import React, { JSXElementConstructor, ReactNode } from "react";
+import {
+    ComponentProps,
+    HTMLAttributes,
+    JSXElementConstructor,
+    ReactNode,
+} from "react";
 import { ChildrenFilter } from "./ChildrenFilter";
+import { genericMemo } from "../utils/react";
 
 type ComponentType = JSXElementConstructor<any>;
 
@@ -8,11 +14,11 @@ type HTMLTag = keyof HTMLElementTagNameMap;
 type Props<T extends ComponentType | HTMLTag> = {
     children: ReactNode;
     of: T;
-} & (T extends ComponentType ? React.ComponentProps<T> : {}) &
-    (T extends HTMLTag ? React.ComponentProps<T> : {}) &
-    React.HTMLAttributes<HTMLElement>;
+} & (T extends ComponentType ? ComponentProps<T> : any) &
+    (T extends HTMLTag ? ComponentProps<T> : any) &
+    HTMLAttributes<HTMLElement>;
 
-export const Except = <T extends ComponentType>({
+export const ExceptComponent = <T extends ComponentType>({
     children,
     of,
     ...rest
@@ -23,3 +29,6 @@ export const Except = <T extends ComponentType>({
         </ChildrenFilter>
     );
 };
+
+export const Except = genericMemo(ExceptComponent);
+Except.displayName = "Except";

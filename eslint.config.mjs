@@ -23,6 +23,7 @@ export default [
                 ecmaFeatures: {
                     jsx: true,
                 },
+                project: "./tsconfig.json", // Add TypeScript project configuration
             },
         },
         plugins: {
@@ -35,13 +36,16 @@ export default [
         rules: {
             ...typescript.configs.recommended.rules,
             ...react.configs.recommended.rules,
-            // ...reactHooks.configs.recommended.rules,
-            // ...prettier.configs.recommended.rules,
+            ...reactHooks.configs.recommended.rules, // Uncomment this
+            "prettier/prettier": "error", // Add Prettier rule
             ...storybook.configs.recommended.rules,
             ...prettierConfig.rules,
-            ...js.configs.recommended.rules,
 
             "react/react-in-jsx-scope": "off",
+            // Disable conflicting ESLint rules that TypeScript handles
+            "no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": "error",
+            "no-undef": "off", // TypeScript handles this
         },
         settings: {
             react: {

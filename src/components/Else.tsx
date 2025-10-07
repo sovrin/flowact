@@ -1,9 +1,13 @@
 import React from "react";
+import { genericMemo } from "../utils/react";
 
 type ElseProps = {
     children: React.ReactNode;
 };
 
-export const Else = ({ children }: ElseProps) => {
+const ElseComponent = ({ children }: ElseProps) => {
     return <>{children}</>;
 };
+
+export const Else = genericMemo(ElseComponent);
+Else.displayName = "Else";

@@ -1,9 +1,13 @@
 import { ReactNode } from "react";
+import { genericMemo } from "../utils/react";
 
 type FallbackProps = {
     children: ReactNode;
 };
 
-export const Fallback = ({ children }: FallbackProps) => {
+const FallbackComponent = ({ children }: FallbackProps) => {
     return <>{children}</>;
 };
+
+export const Fallback = genericMemo(FallbackComponent);
+Fallback.displayName = "Fallback";

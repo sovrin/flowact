@@ -19,14 +19,16 @@ type Story = StoryObj<typeof meta>;
 export const True: Story = {
     args: {
         condition: true,
-        children: <Then>"Show this content"</Then>,
+        children: (
+            <Then>{"condition is true, showing content of <Then/>"}</Then>
+        ),
     },
 };
 
 export const False: Story = {
     args: {
         condition: false,
-        children: <Else>"Hide this content"</Else>,
+        children: <Else>{"condition is false, showing of <Else/>"}</Else>,
     },
 };
 
@@ -35,8 +37,8 @@ export const WithElse: Story = {
         condition: false,
         children: (
             <>
-                <Then>Main content</Then>
-                <Else>Else content</Else>
+                <Then>{"<Then/> content"}</Then>
+                <Else>{"<Else/> content"}</Else>
             </>
         ),
     },

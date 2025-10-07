@@ -1,11 +1,16 @@
-import React, {
+import {
+    Children,
     cloneElement,
+    ComponentProps,
+    Fragment,
+    HTMLAttributes,
     isValidElement,
     JSXElementConstructor,
     ReactElement,
     ReactNode,
 } from "react";
 import { traverse } from "../utils/children";
+import { genericMemo, unpackFragment } from "../utils/react";
 
 type ComponentType = JSXElementConstructor<unknown>;
 type HTMLTag = keyof HTMLElementTagNameMap;
@@ -14,16 +19,18 @@ type Props<T extends ComponentType> = {
     children: ReactNode;
     type: T | HTMLTag;
     not?: boolean;
-} & React.ComponentProps<T> &
-    React.ComponentProps<HTMLTag> &
-    React.HTMLAttributes<HTMLElement>;
+} & ComponentProps<T> &
+    ComponentProps<HTMLTag> &
+    HTMLAttributes<HTMLElement>;
 
-export const ChildrenFilter = <T extends ComponentType>({
+const ChildrenFilterComponent = <T extends ComponentType>({
     children,
     type,
     not = false,
     ...rest
 }: Props<T>) => {
+    children = Children.toArray(children).flatMap(unpackFragment);
+
     const candidates: ReactElement[] = traverse(children, not, type);
     if (!candidates.length) {
         return undefined;
@@ -40,3 +47,6 @@ export const ChildrenFilter = <T extends ComponentType>({
             : candidate;
     });
 };
+
+export const ChildrenFilter = genericMemo(ChildrenFilterComponent);
+ChildrenFilter.displayName = "ChildrenFilter";
