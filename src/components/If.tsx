@@ -17,5 +17,18 @@ const IfComponent = ({ condition, children }: IfProps) => {
     return <Only of={Then}>{children}</Only>;
 };
 
-export const If = genericMemo(IfComponent);
+const MemoizedIf = genericMemo(IfComponent);
+type MemoizedIfType = typeof MemoizedIf;
+
+interface IfType extends MemoizedIfType {
+    Then: typeof Then;
+    Else: typeof Else;
+}
+
+export const If = MemoizedIf as IfType;
+If.Then = Then;
+If.Else = Else;
 If.displayName = "If";
+
+export { Then } from "./Then";
+export { Else } from "./Else";

@@ -1,30 +1,15 @@
-import {
-    ComponentProps,
-    HTMLAttributes,
-    JSXElementConstructor,
-    ReactNode,
-} from "react";
+import { ComponentType, JSX, ReactNode } from "react";
 import { ChildrenFilter } from "./ChildrenFilter";
 import { genericMemo } from "../utils/react";
 
-type ComponentType = JSXElementConstructor<any>;
-
-type HTMLTag = keyof HTMLElementTagNameMap;
-
-type Props<T extends ComponentType | HTMLTag> = {
+type ExceptProps = {
+    of: ComponentType<never> | keyof JSX.IntrinsicElements;
     children: ReactNode;
-    of: T;
-} & (T extends ComponentType ? ComponentProps<T> : any) &
-    (T extends HTMLTag ? ComponentProps<T> : any) &
-    HTMLAttributes<HTMLElement>;
+};
 
-export const ExceptComponent = <T extends ComponentType>({
-    children,
-    of,
-    ...rest
-}: Props<T>) => {
+export const ExceptComponent = ({ children, of, ...rest }: ExceptProps) => {
     return (
-        <ChildrenFilter type={of} not={true} {...rest}>
+        <ChildrenFilter of={of} not={true} {...rest}>
             {children}
         </ChildrenFilter>
     );

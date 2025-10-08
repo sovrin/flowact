@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent } from "storybook/test";
+import { expect } from "storybook/test";
 
 import { ForEach, Item } from "./index";
 import { Fallback } from "../Fallback";
-import { ListItem, UserItem } from "../../../examples/components";
+import { UserItem } from "../../../examples/components";
 import { UserType } from "../../../examples/types";
 import { Fragment, ReactNode } from "react";
 

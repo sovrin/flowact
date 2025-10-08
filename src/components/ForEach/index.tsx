@@ -1,4 +1,11 @@
-import { cloneElement, Fragment, ReactNode, useCallback, useMemo } from "react";
+import {
+    cloneElement,
+    Fragment,
+    isValidElement,
+    ReactNode,
+    useCallback,
+    useMemo,
+} from "react";
 import { Only } from "../Only";
 import { Fallback } from "../Fallback";
 import { Item, TypedItem } from "./item";
@@ -27,55 +34,33 @@ const ForEachComponent = <T,>({
 }: ForEachProps<T>) => {
     const memoizedIdentifier = useCallback(identifier, [identifier]);
 
-    const TypedItem = useMemo(() => Item as TypedItem<T>, []);
+    if (of?.length === 0 && isValidElement(children)) {
+        return <Only of={Fallback}>{children}</Only>;
+    }
 
-    const renderItems = useMemo(() => {
-        if (typeof children === "function") {
-            return null;
-        }
+    const renderStaticItems = useMemo(() => {
+        if (typeof children === "function") return null;
 
         return traverse(children, false, Item);
     }, [children]);
 
-    const isEmpty = useMemo(() => !of?.length, [of?.length]);
-
+    const TypedItem = useMemo(() => Item as TypedItem<T>, []);
     const renderItem = useCallback(
         (item: T, index: number) => {
             const key = memoizedIdentifier(item, index);
+            const baseChildren =
+                typeof children === "function"
+                    ? traverse(children({ Item: TypedItem }), false, Item)
+                    : renderStaticItems;
 
-            if (typeof children === "function") {
-                const renderedContent = children({ Item: TypedItem });
-                return (
-                    <Fragment key={key}>
-                        {traverse(renderedContent, false, Item).map(
-                            (child, childIndex) => {
-                                return cloneElement(child, {
-                                    item,
-                                    index,
-                                    key: childIndex,
-                                } as object);
-                            },
-                        )}
-                    </Fragment>
-                );
-            }
+            const renderedChildren = baseChildren!.map((child, childIndex) =>
+                cloneElement(child, { item, index, key: childIndex } as object),
+            );
 
-            const itemChildren = renderItems!.map((child, childIndex) => {
-                return cloneElement(child, {
-                    item,
-                    index,
-                    key: childIndex,
-                } as object);
-            });
-
-            return <Fragment key={key}>{itemChildren}</Fragment>;
+            return <Fragment key={key}>{renderedChildren}</Fragment>;
         },
-        [memoizedIdentifier, renderItems, children, TypedItem],
+        [memoizedIdentifier, renderStaticItems, children, TypedItem],
     );
-
-    if (isEmpty) {
-        return <Only of={Fallback}>{children}</Only>;
-    }
 
     return <>{of.map(renderItem)}</>;
 };
@@ -92,4 +77,3 @@ ForEach.Item = Item;
 ForEach.displayName = "ForEach";
 
 export { Item } from "./item";
-ForEach.displayName = "ForEach";

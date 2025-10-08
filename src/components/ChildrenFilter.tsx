@@ -1,37 +1,30 @@
 import {
     Children,
     cloneElement,
-    ComponentProps,
-    Fragment,
-    HTMLAttributes,
+    ComponentType,
     isValidElement,
-    JSXElementConstructor,
+    JSX,
     ReactElement,
     ReactNode,
 } from "react";
 import { traverse } from "../utils/children";
 import { genericMemo, unpackFragment } from "../utils/react";
 
-type ComponentType = JSXElementConstructor<unknown>;
-type HTMLTag = keyof HTMLElementTagNameMap;
-
-type Props<T extends ComponentType> = {
+type ChildrenFilterProps = {
     children: ReactNode;
-    type: T | HTMLTag;
+    of: ComponentType<never> | keyof JSX.IntrinsicElements;
     not?: boolean;
-} & ComponentProps<T> &
-    ComponentProps<HTMLTag> &
-    HTMLAttributes<HTMLElement>;
+};
 
-const ChildrenFilterComponent = <T extends ComponentType>({
+const ChildrenFilterComponent = ({
     children,
-    type,
+    of,
     not = false,
     ...rest
-}: Props<T>) => {
+}: ChildrenFilterProps) => {
     children = Children.toArray(children).flatMap(unpackFragment);
 
-    const candidates: ReactElement[] = traverse(children, not, type);
+    const candidates: ReactElement[] = traverse(children, not, of);
     if (!candidates.length) {
         return undefined;
     }

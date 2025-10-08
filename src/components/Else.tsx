@@ -1,8 +1,8 @@
-import React from "react";
+import { ReactNode } from "react";
 import { genericMemo } from "../utils/react";
 
 type ElseProps = {
-    children: React.ReactNode;
+    children: ReactNode;
 };
 
 const ElseComponent = ({ children }: ElseProps) => {

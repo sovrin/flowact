@@ -7,7 +7,7 @@ type ItemWithRenderProp<T> = {
 };
 
 type ItemWithComponent<T> = {
-    as: ComponentType<{ item: T; index: number; [key: string]: any }>;
+    as: ComponentType<{ item: T; index: number; [key: string]: unknown }>;
     children?: never;
 };
 
@@ -40,7 +40,6 @@ const ItemComponent = <T,>({
     }
 
     if (Component) {
-        // @ts-ignore
         return <Component {...restProps} />;
     }
 

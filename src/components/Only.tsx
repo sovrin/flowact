@@ -1,33 +1,15 @@
-import {
-    ComponentProps,
-    HTMLAttributes,
-    JSXElementConstructor,
-    ReactNode,
-} from "react";
+import { ReactNode, JSX, ComponentType } from "react";
 import { ChildrenFilter } from "./ChildrenFilter";
 import { genericMemo } from "../utils/react";
-import { Prettify } from "../types";
 
-type ComponentType = JSXElementConstructor<Record<string, unknown>>;
+type OnlyProps = {
+    of: ComponentType<never> | keyof JSX.IntrinsicElements;
+    children: ReactNode;
+};
 
-type HTMLTag = keyof HTMLElementTagNameMap;
-
-type OnlyProps<T extends ComponentType | HTMLTag> = Prettify<
-    {
-        children: ReactNode;
-        of: T;
-    } & (T extends ComponentType ? ComponentProps<T> : Record<string, never>) &
-        (T extends HTMLTag ? ComponentProps<T> : Record<string, never>) &
-        HTMLAttributes<HTMLElement>
->;
-
-const OnlyComponent = <T extends ComponentType>({
-    children,
-    of,
-    ...rest
-}: OnlyProps<T>) => {
+const OnlyComponent = ({ children, of, ...rest }: OnlyProps) => {
     return (
-        <ChildrenFilter type={of} not={false} {...rest}>
+        <ChildrenFilter of={of} not={false} {...rest}>
             {children}
         </ChildrenFilter>
     );
