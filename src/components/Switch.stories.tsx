@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Switch, Case } from "./Switch";
+import { Case, Switch } from "./Switch";
 import { Fallback } from "./Fallback";
 import { Fragment } from "react";
+import { expect } from "storybook/test";
 
 const meta = {
     title: "Switch",
@@ -30,6 +31,9 @@ export const Default: Story = {
             <Case when={3}>three</Case>
         </Switch>
     ),
+    play: async ({ canvas }) => {
+        await expect(canvas.getByText("one")).toBeVisible();
+    },
 };
 
 export const WithFallback: Story = {
@@ -44,6 +48,25 @@ export const WithFallback: Story = {
             <Case when={3}>three</Case>
         </Switch>
     ),
+    play: async ({ canvas }) => {
+        await expect(canvas.getByText("none")).toBeVisible();
+    },
+};
+
+export const WithRenderProp: Story = {
+    args: {
+        value: 2,
+        children: ({ Case }) => (
+            <Fragment>
+                <Case when={1}>one</Case>
+                <Case when={2}>two</Case>
+                <Case when={3}>three</Case>
+            </Fragment>
+        ),
+    },
+    play: async ({ canvas }) => {
+        await expect(canvas.getByText("two")).toBeVisible();
+    },
 };
 
 export const InsideFragment: Story = {
@@ -57,5 +80,7 @@ export const InsideFragment: Story = {
             </Fragment>
         ),
     },
-    render: ({ value, children }) => <Switch value={value}>{children}</Switch>,
+    play: async ({ canvas }) => {
+        await expect(canvas.getByText("one")).toBeVisible();
+    },
 };
