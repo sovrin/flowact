@@ -21,7 +21,8 @@
     "declaration": true
   },
   "include": [
-    "src"
+    "src",
+    "examples"
   ],
   "exclude": [
     "src/**/__docs__",
