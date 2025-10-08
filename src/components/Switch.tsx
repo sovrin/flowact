@@ -8,10 +8,8 @@ import {
 } from "react";
 import { genericMemo, unpackFragment } from "../utils/react";
 import { Only } from "./Only";
-import { Fallback } from "./Fallback";
 import { traverse } from "../utils/children";
-
-type Test<T> = {};
+import { Default } from "./Default";
 
 type CaseProps = {
     when: unknown;
@@ -37,7 +35,7 @@ type SwitchProps<T> = WithRenderProp<T> | WithStaticChildren<T>;
 type WithRenderProp<T> = CaseBaseProps<T> & {
     children: (props: {
         Case: TypedCase<T>;
-        Fallback: typeof Fallback;
+        Default: typeof Default;
     }) => ReactNode;
 };
 
@@ -51,7 +49,7 @@ const SwitchComponent = <T,>({ value, children }: SwitchProps<T>) => {
     if (typeof children === "function") {
         const TypedCase = useMemo(() => Case as TypedCase<T>, []);
         children = traverse(
-            children({ Case: TypedCase, Fallback }),
+            children({ Case: TypedCase, Default }),
             false,
             Case,
         );
@@ -75,7 +73,7 @@ const SwitchComponent = <T,>({ value, children }: SwitchProps<T>) => {
         return <>{matchingCase.props.children}</>;
     }
 
-    return <Only of={Fallback}>{childrenArray}</Only>;
+    return <Only of={Default}>{childrenArray}</Only>;
 };
 
 export const Switch = genericMemo(SwitchComponent);

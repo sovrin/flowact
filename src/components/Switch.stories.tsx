@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Case, Switch } from "./Switch";
-import { Fallback } from "./Fallback";
+import { Default as FallbackDefault } from "./Default";
 import { Fragment } from "react";
 import { expect } from "storybook/test";
 
@@ -36,20 +36,20 @@ export const Default: Story = {
     },
 };
 
-export const WithFallback: Story = {
+export const WithDefault: Story = {
     args: {
         value: null,
     },
     render: ({ value }) => (
         <Switch value={value}>
-            <Fallback>none</Fallback>
+            <FallbackDefault>default</FallbackDefault>
             <Case when={1}>one</Case>
             <Case when={2}>two</Case>
             <Case when={3}>three</Case>
         </Switch>
     ),
     play: async ({ canvas }) => {
-        await expect(canvas.getByText("none")).toBeVisible();
+        await expect(canvas.getByText("default")).toBeVisible();
     },
 };
 
