@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
 
-import { ForEach, Item } from "./index";
-import { Fallback } from "../Fallback";
-import { UserItem } from "../../../examples/components";
-import { UserType } from "../../../examples/types";
+import { ForEach, Item, ItemType } from "./ForEach";
+import { Fallback } from "./Fallback";
+import { UserItem } from "../../examples/components";
+import { UserType } from "../../examples/types";
 import { Fragment, Profiler, ProfilerOnRenderCallback, ReactNode } from "react";
 
 const meta = {
@@ -163,7 +163,7 @@ export const WithStatics: Story = {
     },
 };
 
-const Name = ({ item: { name }, index }) => (
+const Name = ({ item: { name }, index }: ItemType<{ name: string }>) => (
     <div>
         {name} #{index}
     </div>

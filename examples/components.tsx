@@ -1,5 +1,5 @@
-import { ItemType } from "../src/components/ForEach/item";
 import { UserType } from "./types";
+import { ItemType } from "../src/components/ForEach";
 
 export const UserItem = ({
     item: user,

@@ -1,15 +1,23 @@
 import {
+    ComponentType,
     createElement,
     Fragment,
-    isValidElement,
+    ReactElement,
     ReactNode,
     useMemo,
 } from "react";
-import { Only } from "../Only";
-import { Fallback } from "../Fallback";
-import { Item, TypedItem } from "./item";
-import { traverse } from "../../utils/children";
-import { genericMemo } from "../../utils/react";
+import { Only } from "./Only";
+import { Fallback } from "./Fallback";
+import { extractContainer, genericMemo } from "../utils/react";
+
+export type ItemType<T> = {
+    item: T;
+    index: number;
+};
+
+export type TypedItem<T> = ComponentType<{
+    as?: ComponentType<ItemType<T>> | ReactElement;
+}>;
 
 type ForEachBaseProps<T> = {
     of: T[];
@@ -26,29 +34,49 @@ type WithStaticChildren<T> = ForEachBaseProps<T> & {
 
 type ForEachProps<T> = WithRenderProp<T> | WithStaticChildren<T>;
 
+type ItemWithRenderProp<T> = {
+    children: (data: { item: T; index: number }) => ReactNode;
+    as?: never;
+};
+
+type ItemWithComponent<T> = {
+    as: ComponentType<{ item: T; index: number; [key: string]: unknown }>;
+    children?: never;
+};
+
+type ItemWithStaticChildren = {
+    children?: ReactNode;
+    as?: never;
+};
+
+type ItemProps<T> =
+    | ItemWithRenderProp<T>
+    | ItemWithComponent<T>
+    | ItemWithStaticChildren;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const Item = <T,>(props: ItemProps<T>) => {
+    return null;
+};
+
 const getItemComponents = <T,>(
     children: ReactNode | ((props: { Item: TypedItem<T> }) => ReactNode),
 ) => {
-    const content =
-        typeof children === "function"
-            ? children({ Item: Item as TypedItem<T> })
-            : children;
-
-    const items = traverse(content, false, Item);
-
-    return items.map((item) => {
-        const itemProps = item.props as { as?: any; children?: any };
-
-        return itemProps.as || itemProps.children;
-    });
+    return extractContainer(
+        children,
+        { Item },
+        Item,
+        ["as", "children"],
+        ({ as, children }) => as || children,
+    );
 };
 
 const ForEachComponent = <T,>({
     children,
     of,
-    identifier = (_, index) => index,
+    identifier,
 }: ForEachProps<T>) => {
-    if (of?.length === 0 && isValidElement(children)) {
+    if (of?.length === 0) {
         return <Only of={Fallback}>{children}</Only>;
     }
 
@@ -59,7 +87,10 @@ const ForEachComponent = <T,>({
 
     const renderedItems = useMemo(() => {
         return of.map((item, index) => {
-            const key = identifier(item, index);
+            const key =
+                typeof identifier === "function"
+                    ? identifier(item, index)
+                    : index;
 
             const rendered = components.map((Component) => {
                 return createElement(Component, {
@@ -72,6 +103,10 @@ const ForEachComponent = <T,>({
             return <Fragment key={key}>{rendered}</Fragment>;
         });
     }, [of, components, identifier]);
+
+    if (renderedItems.length === 0) {
+        return <Only of={Fallback}>{children}</Only>;
+    }
 
     return <>{renderedItems}</>;
 };
@@ -86,5 +121,3 @@ interface ForEachType extends MemoizedForEachType {
 export const ForEach = MemoizedForEach as ForEachType;
 ForEach.Item = Item;
 ForEach.displayName = "ForEach";
-
-export { Item } from "./item";
