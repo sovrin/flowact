@@ -5,7 +5,7 @@ import { ForEach, Item } from "./index";
 import { Fallback } from "../Fallback";
 import { UserItem } from "../../../examples/components";
 import { UserType } from "../../../examples/types";
-import { Fragment, ReactNode } from "react";
+import { Fragment, Profiler, ProfilerOnRenderCallback, ReactNode } from "react";
 
 const meta = {
     title: "ForEach",
@@ -34,6 +34,7 @@ export const Default: Story = {
     args: {
         of: USERS,
         children: <Item as={UserItem} />,
+        identifier: (user) => user.name,
     },
     play: async ({ canvas }) => {
         await expect(
@@ -160,4 +161,52 @@ export const WithStatics: Story = {
             canvas.getByText('"Jane Doe"-"jane@example.com", #1'),
         ).toBeVisible();
     },
+};
+
+const Name = ({ item: { name }, index }) => (
+    <div>
+        {name} #{index}
+    </div>
+);
+
+const PERFORMANCE_USERS = Array.from({ length: 10000 }, (_, i) => ({
+    name: `User ${i}`,
+    email: `user${i}@example.com`,
+}));
+
+const onRenderCallback: ProfilerOnRenderCallback = (
+    id,
+    phase,
+    actualDuration,
+    baseDuration,
+    startTime,
+    commitTime,
+) => {
+    console.log(`[${id}] ${phase} phase:`);
+    console.log(`  Actual duration: ${actualDuration.toFixed(2)}ms`);
+    console.log(`  Base duration: ${baseDuration.toFixed(2)}ms`);
+    console.log(`  Start time: ${startTime.toFixed(2)}ms`);
+    console.log(`  Commit time: ${commitTime.toFixed(2)}ms`);
+};
+
+export const PerformanceForEachComponent: Story = {
+    render: () => (
+        <Profiler id="ForEach-Performance" onRender={onRenderCallback}>
+            <ForEach of={PERFORMANCE_USERS}>
+                <Item<UserType> as={Name} />
+            </ForEach>
+        </Profiler>
+    ),
+};
+
+export const PerformanceNativeMap: Story = {
+    render: () => (
+        <Profiler id="Native-Map-Performance" onRender={onRenderCallback}>
+            <>
+                {PERFORMANCE_USERS.map((user, i) => (
+                    <Name key={i} item={user} index={i} />
+                ))}
+            </>
+        </Profiler>
+    ),
 };

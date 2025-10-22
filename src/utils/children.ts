@@ -1,10 +1,29 @@
-import {
-    Children,
-    Fragment,
-    isValidElement,
-    ReactElement,
-    ReactNode,
-} from "react";
+import { Children, Fragment, ReactElement, ReactNode } from "react";
+
+const collectResults = (
+    target: ReactElement[],
+    source: ReactElement[],
+): void => {
+    for (let i = 0; i < source.length; i++) {
+        target.push(source[i]);
+    }
+};
+
+const shouldMatch = (
+    childType: unknown,
+    not: boolean,
+    type?: unknown,
+): boolean => {
+    return not ? childType !== type : childType === type;
+};
+
+const getChildren = (props: any): ReactNode | undefined => {
+    return props.children;
+};
+
+const isValid = (child: any): child is ReactElement => {
+    return child?.props !== undefined && child?.type !== undefined;
+};
 
 export const traverse = (
     nodes: ReactNode,
@@ -14,30 +33,25 @@ export const traverse = (
     const context: ReactElement[] = [];
 
     Children.forEach(nodes, (child) => {
-        if (!isValidElement(child)) return;
+        if (!isValid(child)) return;
 
-        if (child.type === Fragment) {
-            context.push(
-                ...traverse(
-                    (child.props as { children?: ReactNode }).children,
-                    not,
-                    type,
-                ),
-            );
+        const childType = child.type;
+        const children = getChildren(child.props);
+
+        if (childType === Fragment) {
+            if (children) {
+                collectResults(context, traverse(children, not, type));
+            }
+
             return;
         }
 
-        const matches = not
-            ? child && child.type !== type
-            : child && child.type === type;
-
-        if (matches) {
+        if (shouldMatch(childType, not, type)) {
             context.push(child);
         }
 
-        const childProps = child.props as { children?: ReactNode };
-        if (childProps.children) {
-            context.push(...traverse(childProps.children, not, type));
+        if (children) {
+            collectResults(context, traverse(children, not, type));
         }
     });
 

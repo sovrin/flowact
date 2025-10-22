@@ -1,9 +1,8 @@
 import {
-    cloneElement,
+    createElement,
     Fragment,
     isValidElement,
     ReactNode,
-    useCallback,
     useMemo,
 } from "react";
 import { Only } from "../Only";
@@ -27,42 +26,54 @@ type WithStaticChildren<T> = ForEachBaseProps<T> & {
 
 type ForEachProps<T> = WithRenderProp<T> | WithStaticChildren<T>;
 
+const getItemComponents = <T,>(
+    children: ReactNode | ((props: { Item: TypedItem<T> }) => ReactNode),
+) => {
+    const content =
+        typeof children === "function"
+            ? children({ Item: Item as TypedItem<T> })
+            : children;
+
+    const items = traverse(content, false, Item);
+
+    return items.map((item) => {
+        const itemProps = item.props as { as?: any; children?: any };
+
+        return itemProps.as || itemProps.children;
+    });
+};
+
 const ForEachComponent = <T,>({
     children,
     of,
     identifier = (_, index) => index,
 }: ForEachProps<T>) => {
-    const memoizedIdentifier = useCallback(identifier, [identifier]);
-
     if (of?.length === 0 && isValidElement(children)) {
         return <Only of={Fallback}>{children}</Only>;
     }
 
-    const renderStaticItems = useMemo(() => {
-        if (typeof children === "function") return null;
-
-        return traverse(children, false, Item);
-    }, [children]);
-
-    const TypedItem = useMemo(() => Item as TypedItem<T>, []);
-    const renderItem = useCallback(
-        (item: T, index: number) => {
-            const key = memoizedIdentifier(item, index);
-            const baseChildren =
-                typeof children === "function"
-                    ? traverse(children({ Item: TypedItem }), false, Item)
-                    : renderStaticItems;
-
-            const renderedChildren = baseChildren!.map((child, childIndex) =>
-                cloneElement(child, { item, index, key: childIndex } as object),
-            );
-
-            return <Fragment key={key}>{renderedChildren}</Fragment>;
-        },
-        [memoizedIdentifier, renderStaticItems, children, TypedItem],
+    const components = useMemo(
+        () => getItemComponents<T>(children),
+        [children],
     );
 
-    return <>{of.map(renderItem)}</>;
+    const renderedItems = useMemo(() => {
+        return of.map((item, index) => {
+            const key = identifier(item, index);
+
+            const rendered = components.map((Component) => {
+                return createElement(Component, {
+                    item,
+                    index,
+                    key,
+                });
+            });
+
+            return <Fragment key={key}>{rendered}</Fragment>;
+        });
+    }, [of, components, identifier]);
+
+    return <>{renderedItems}</>;
 };
 
 const MemoizedForEach = genericMemo(ForEachComponent);

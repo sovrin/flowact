@@ -20,7 +20,7 @@ const Name = ({item: name}) => <div>{name}</div>;
 
 or a typed (but less declarative) version
 ```typescript jsx
-import {ForEach, Item} from "./index";
+import {ForEach} from "./index";
 
 const USERS = ['Jon', 'Jane'];
 const Name = ({item: name}) => <div>{name}</div>;

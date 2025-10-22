@@ -30,11 +30,9 @@ const ChildrenFilterComponent = ({
     }
 
     return candidates.map((candidate, i) => {
-        const key = { key: i };
-
         return isValidElement(candidate)
             ? cloneElement(candidate, {
-                  key,
+                  key: i,
                   ...rest,
               })
             : candidate;
