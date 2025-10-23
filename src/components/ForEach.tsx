@@ -76,16 +76,16 @@ const ForEachComponent = <T,>({
     of,
     identifier,
 }: ForEachProps<T>) => {
-    if (of?.length === 0) {
-        return <Only of={Fallback}>{children}</Only>;
-    }
-
     const components = useMemo(
         () => getItemComponents<T>(children),
         [children],
     );
 
     const renderedItems = useMemo(() => {
+        if (of.length === 0) {
+            return null;
+        }
+
         return of.map((item, index) => {
             const key =
                 typeof identifier === "function"
@@ -104,7 +104,7 @@ const ForEachComponent = <T,>({
         });
     }, [of, components, identifier]);
 
-    if (renderedItems.length === 0) {
+    if (of?.length === 0 || !renderedItems) {
         return <Only of={Fallback}>{children}</Only>;
     }
 
