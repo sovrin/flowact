@@ -34,7 +34,7 @@ export const Default: Story = {
     args: {
         of: USERS,
         children: <Item as={UserItem} />,
-        identifier: (user) => user.name,
+        identifier: (user: any) => user.name as string,
     },
     play: async ({ canvas }) => {
         await expect(
@@ -46,7 +46,7 @@ export const Default: Story = {
     },
 };
 
-export const WithInlineRender: Story = {
+export const WithInlineComponent: Story = {
     args: {
         of: USERS,
         children: (
@@ -74,7 +74,25 @@ export const WithInlineRender: Story = {
     },
 };
 
-export const WithRenderProp: Story = {
+export const WithDirectComponentChild: Story = {
+    args: {
+        of: USERS,
+        children: null,
+    },
+    play: async ({ canvas }) => {
+        await expect(
+            canvas.getByText('"Jon Doe"-"jon@example.com", #0'),
+        ).toBeVisible();
+        await expect(
+            canvas.getByText('"Jane Doe"-"jane@example.com", #1'),
+        ).toBeVisible();
+    },
+    render: (args) => {
+        return <ForEach of={args?.of as UserType[]}>{UserItem}</ForEach>;
+    },
+};
+
+export const WithComponentAsChild: Story = {
     args: {
         of: USERS,
         children: <Item<UserType>>{UserItem}</Item>,
@@ -89,7 +107,7 @@ export const WithRenderProp: Story = {
     },
 };
 
-export const WithFallback: Story = {
+export const WithEmptyListFallback: Story = {
     args: {
         of: [],
         children: (
@@ -104,7 +122,7 @@ export const WithFallback: Story = {
     },
 };
 
-export const WithTypedItem: Story = {
+export const WithTypedRenderPropFunction: Story = {
     args: {
         of: USERS,
         children: null,
@@ -125,7 +143,24 @@ export const WithTypedItem: Story = {
         ).toBeVisible();
     },
 };
-export const WithRestParameters: Story = {
+
+export const WithMixedStaticAndDynamicChildren: Story = {
+    args: {
+        of: USERS,
+        children: null,
+    },
+    render: (args) => {
+        return (
+            <ForEach of={args?.of}>
+                <div>{"foo"}</div>
+                <Item<UserType> as={UserItem} />
+                <div>{"bar"}</div>
+            </ForEach>
+        );
+    },
+};
+
+export const WithFallbackAndItems: Story = {
     args: {
         of: USERS,
         children: <Fallback>fallback hello</Fallback>,
@@ -148,7 +183,7 @@ export const WithRestParameters: Story = {
     },
 };
 
-export const WithStatics: Story = {
+export const WithStaticItemProperty: Story = {
     args: {
         of: USERS,
         children: <ForEach.Item as={UserItem} />,
@@ -189,7 +224,8 @@ const onRenderCallback: ProfilerOnRenderCallback = (
     console.log(`  Commit time: ${commitTime.toFixed(2)}ms`);
 };
 
-export const PerformanceForEachComponent: Story = {
+// @ts-expect-error TS2322
+export const PerformanceBenchmark: Story = {
     render: () => (
         <Profiler id="ForEach-Performance" onRender={onRenderCallback}>
             <ForEach of={PERFORMANCE_USERS}>
@@ -199,7 +235,8 @@ export const PerformanceForEachComponent: Story = {
     ),
 };
 
-export const PerformanceNativeMap: Story = {
+// @ts-expect-error TS2322
+export const PerformanceNativeMapBaseline: Story = {
     render: () => (
         <Profiler id="Native-Map-Performance" onRender={onRenderCallback}>
             <>
