@@ -2,6 +2,7 @@ import {
     ComponentType,
     createElement,
     Fragment,
+    JSX,
     ReactElement,
     ReactNode,
     useMemo,
@@ -9,15 +10,6 @@ import {
 import { Only } from "./Only";
 import { Fallback } from "./Fallback";
 import { extractContainer, genericMemo } from "../utils/react";
-
-export type ItemType<T> = {
-    item: T;
-    index: number;
-};
-
-export type TypedItem<T> = ComponentType<{
-    as?: ComponentType<ItemType<T>> | ReactElement;
-}>;
 
 type ForEachBaseProps<T> = {
     of: T[];
@@ -32,7 +24,18 @@ type WithStaticChildren<T> = ForEachBaseProps<T> & {
     children: ReactNode;
 };
 
-type ForEachProps<T> = WithRenderProp<T> | WithStaticChildren<T>;
+type WithComponent<T> = ForEachBaseProps<T> & {
+    children: ComponentType<ItemType<T>>;
+};
+
+export type ItemType<T> = {
+    item: T;
+    index: number;
+};
+
+export type TypedItem<T> = ComponentType<{
+    as?: ComponentType<ItemType<T>> | ReactElement;
+}>;
 
 type ItemWithRenderProp<T> = {
     children: (data: { item: T; index: number }) => ReactNode;
@@ -62,6 +65,12 @@ export const Item = <T,>(props: ItemProps<T>) => {
 const getItemComponents = <T,>(
     children: ReactNode | ((props: { Item: TypedItem<T> }) => ReactNode),
 ) => {
+    if (typeof children === "function") {
+        if (children.name !== "children") {
+            return [children];
+        }
+    }
+
     return extractContainer(
         children,
         { Item },
@@ -71,11 +80,14 @@ const getItemComponents = <T,>(
     );
 };
 
-const ForEachComponent = <T,>({
+function ForEachComponent<T>(props: WithRenderProp<T>): JSX.Element;
+function ForEachComponent<T>(props: WithComponent<T>): JSX.Element;
+function ForEachComponent<T>(props: WithStaticChildren<T>): JSX.Element;
+function ForEachComponent<T>({
     children,
     of,
     identifier,
-}: ForEachProps<T>) => {
+}: ForEachBaseProps<T> & { children: any }): JSX.Element {
     const components = useMemo(
         () => getItemComponents<T>(children),
         [children],
@@ -109,7 +121,7 @@ const ForEachComponent = <T,>({
     }
 
     return <>{renderedItems}</>;
-};
+}
 
 const MemoizedForEach = genericMemo(ForEachComponent);
 type MemoizedForEachType = typeof MemoizedForEach;

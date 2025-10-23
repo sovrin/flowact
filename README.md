@@ -8,6 +8,18 @@ I want to tackle this dissatisfaction with tailored and slightly opinionated com
 ## Examples
 
 ```typescript jsx
+import {ForEach} from "./index";
+
+const USERS = ['Jon', 'Jane'];
+const Name = ({item: name}) => <div>{name}</div>;
+
+<ForEach of={USERS}>
+    {Name}
+</ForEach>
+```
+
+or with a dedicated Item component
+```typescript jsx
 import {ForEach, Item} from "./index";
 
 const USERS = ['Jon', 'Jane'];
@@ -18,7 +30,7 @@ const Name = ({item: name}) => <div>{name}</div>;
 </ForEach>
 ```
 
-or a typed (but less declarative) version
+or a typed version
 ```typescript jsx
 import {ForEach} from "./index";
 
