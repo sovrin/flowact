@@ -45,7 +45,8 @@ export default [
             // Disable conflicting ESLint rules that TypeScript handles
             "no-unused-vars": "off",
             "@typescript-eslint/no-unused-vars": "error",
-            "no-undef": "off", // TypeScript handles this
+            "no-undef": "off",
+            "no-redeclare": "off",
         },
         settings: {
             react: {

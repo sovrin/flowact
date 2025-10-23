@@ -1,6 +1,9 @@
 .idea
+temp
 
 node_modules
+package-lock.json
+
 dist
 
 #storybook build directory
